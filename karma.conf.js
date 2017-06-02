@@ -17,6 +17,7 @@ module.exports = function (config) {
     files: [
       './node_modules/phantomjs-polyfill/bind-polyfill.js',
       './node_modules/sinon/pkg/sinon.js',
+      './test/qrcode.js',
       {
         pattern: './test/index.js',
         watched: false,

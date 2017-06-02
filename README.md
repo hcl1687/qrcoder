@@ -1,128 +1,81 @@
-# promiseflow
-  provides series and parallel flow control for promise.
-  using Array to represent tasks in series.
-  using Object to represent tasks in parallel.
+# QRCoder
+===
 
-  ![series_parallel_input](https://raw.githubusercontent.com/hcl1687/promiseflow/master/img/series_parallel_input.png)
-
+QRCoder is *a pure browser qrcode generation* which is standalone.
+It is based on a <a href='http://www.d-project.com/qrcode/index.html'>library</a>
+which build qrcode in various language.
 
 ## install
-  npm install promiseflow
+npm install qrcoder --save-dev
 
 ## Example
+```javascript
+import QRCoder from 'qrcoder'
 
-### series demo
-
-![series](https://raw.githubusercontent.com/hcl1687/promiseflow/master/img/series.png)
-
-```js
-import flowFactory from 'promiseflow'
-import Promise from 'nd-promise'
-const runFlow = flowFactory(Promise)
-
-const initData = 1
-const fun1 = function (data) {
-  // expect(data).to.be.equal(1)
-  return data + 1
-}
-const fun2 = function (data) {
-  // expect(data).to.be.equal(2)
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(data + 2)
-    }, 50)
-  })
-}
-const arr = [fun1, fun2]
-runFlow(arr, initData).then(data => {
-  // expect(data).to.be.equal(4)
-  done()
-})
+const typeNumber = 4;
+const errorCorrectionLevel = 'L';
+const qr = new QRCoder(typeNumber, errorCorrectionLevel);
+qr.addData('Hi!');
+qr.make();
+document.getElementById('placeHolder').innerHTML = qr.createImgTag();
 ```
+## API Documentation
 
-### parallel demo
+### QRCoder Class
 
-![parallel](https://raw.githubusercontent.com/hcl1687/promiseflow/master/img/parallel.png)
+#### QRCoder(typeNumber, errorCorrectionLevel) => <code>QRCoder</code>
+Create a QRCoder Object.
 
-```js
-import flowFactory from 'promiseflow'
-import Promise from 'nd-promise'
-const runFlow = flowFactory(Promise)
+| Param                | Type                | Description                                 |
+| ---------------------| ------------------- | ------------------------------------------- |
+| typeNumber           | <code>number</code> | Type number (1 ~ 40)                        |
+| errorCorrectionLevel | <code>string</code> | Error correction level ('L', 'M', 'Q', 'H') |
 
-const initData = 1
-const fun1 = function (data) {
-  // expect(data).to.be.equal(1)
-  return data + 1
-}
-const fun2 = function (data) {
-  // expect(data).to.be.equal(1)
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(data + 2)
-    }, 50)
-  })
-}
-const fun3 = function (data) {
-  // expect(data).to.be.equal(1)
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(data + 3)
-    }, 50)
-  })
-}
-const obj = { fun1, fun2, fun3 }
-let promise = runFlow(obj, initData)
-promise.then(data => {
-  // expect(data.fun1).to.be.equal(2)
-  // expect(data.fun2).to.be.equal(3)
-  // expect(data.fun3).to.be.equal(4)
-  // done()
-})
-```
+#### QRCoder.stringToBytes(s) : <code>number[]</code>
+Encodes a string into an array of number(byte) using any charset.
+This function is used by internal.
+Overwrite this function to encode using a multibyte charset.
 
-### series + parallel demo
+| Param  | Type                | Description      |
+| -------| ------------------- | ---------------- |
+| s      | <code>string</code> | string to encode |
 
-![series_parallel](https://raw.githubusercontent.com/hcl1687/promiseflow/master/img/series_parallel.png)
+### QRCoder
 
-```js
-import flowFactory from 'promiseflow'
-import Promise from 'nd-promise'
-const runFlow = flowFactory(Promise)
+#### addData(data, mode) => <code>void</code>
+Add a data to encode.
 
-const initData = 1
-const fun1 = function (data) {
-  // expect(data).to.be.equal(1)
-  return data + 1
-}
-const fun2 = function (data) {
-  // expect(data).to.be.equal(2)
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(data + 2)
-    }, 50)
-  })
-}
-const fun3 = function (data) {
-  // expect(data).to.be.equal(2)
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(data + 3)
-    }, 50)
-  })
-}
-const fun4 = function (data) {
-  // expect(data.fun2).to.be.equal(4)
-  // expect(data.fun3).to.be.equal(5)
-  return data.fun2 + data.fun3
-}
-const arr = [fun1, {
-  fun2, fun3
-}, fun4]
-runFlow(arr, initData).then(data => {
-  // expect(data).to.be.equal(9)
-  // done()
-})
-```
+| Param  | Type                | Description                                                |
+| -------| ------------------- | ---------------------------------------------------------- |
+| data   | <code>string</code> | string to encode                                           |
+| mode   | <code>string</code> | Mode ('Numeric', 'Alphanumeric', 'Byte'(default), 'Kanji') |
+
+#### make() => <code>void</code>
+Make a QR Code.
+
+#### getModuleCount() => <code>number</code>
+The number of modules(cells) for each orientation.
+_[Note] call make() before this function._
+
+#### isDark(row, col) => <code>boolean</code>
+The module at row and col is dark or not.
+_[Note] call make() before this function._
+
+| Param | Type                | Description         |
+| ------| ------------------- | ------------------- |
+| row   | <code>number</code> | 0 ~ moduleCount - 1 |
+| col   | <code>number</code> | 0 ~ moduleCount - 1 |
+
+#### createImgTag(cellSize, margin) => <code>string</code>
+#### createSvgTag(cellSize, margin) => <code>string</code>
+#### createTableTag(cellSize, margin) => <code>string</code>
+Helper functions for HTML.
+ _[Note] call make() before these functions._
+
+| Param    | Type                | Description           |
+| ---------| ------------------- | --------------------- |
+| cellSize | <code>number</code> | default: 2            |
+| margin   | <code>number</code> | default: cellSize * 4 |
 
 ## License
 [MIT](https://opensource.org/licenses/mit-license.php)
