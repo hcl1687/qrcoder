@@ -30,8 +30,6 @@ document.getElementById('placeHolder').innerHTML = imgTag;
 ```javascript
 import QRCoder from 'qrcoder'
 
-const typeNumber = 4;
-const errorCorrectionLevel = 'L';
 const qr = new QRCoder({
   typeNumber: 4,
   errorCorrectionLevel: 'L',
@@ -70,7 +68,7 @@ Create a QRCoder Object.
 
 | Param                | Type                | Description                                 |
 | ---------------------| ------------------- | ------------------------------------------- |
-| options           | <code>Object</code> | options Object
+| options           | <code>object</code> | options Object
 
 
 Default options
