@@ -1,5 +1,4 @@
 # QRCoder
-===
 
 QRCoder is *a pure browser qrcode generation* which is standalone.
 It is based on a <a href='http://www.d-project.com/qrcode/index.html'>library</a>
