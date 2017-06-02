@@ -32,8 +32,6 @@ describe('test qrcode', function () {
       data: 'Hi!'
     })
     const source = qrcoder.createImgTag()
-    console.log(source)
-    console.log(qrcoder.getDataURL())
     expect(source).to.be.equal(target)
   })
 })
