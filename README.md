@@ -6,9 +6,52 @@ It is based on a <a href='http://www.d-project.com/qrcode/index.html'>library</a
 which build qrcode in various language.
 
 ## install
-npm install qrcoder --save-dev
+npm install qrcoder --save
 
 ## Example
+
+### default
+```javascript
+import QRCoder from 'qrcoder'
+
+const qr = new QRCoder({
+  data: 'Hi!'
+});
+
+// data:image/gif;base64,R0lGODdhUgBS...WQBADs=
+const dataURL = qr.getDataURL()
+
+// <img src="data:image/gif;base64,R0lGODdhUgBS...WQBADs=" width="82" height="82"/>
+const imgTag = qr.createImgTag()
+
+document.getElementById('placeHolder').innerHTML = imgTag;
+```
+
+### more options
+```javascript
+import QRCoder from 'qrcoder'
+
+const typeNumber = 4;
+const errorCorrectionLevel = 'L';
+const qr = new QRCoder({
+  typeNumber: 4,
+  errorCorrectionLevel: 'L',
+  mode: 'Byte',
+  cellSize: 2,
+  margin: 8,
+  data: 'Hi!'
+});
+
+// data:image/gif;base64,R0lGODdhUgBS...WQBADs=
+const dataURL = qr.getDataURL()
+
+// <img src="data:image/gif;base64,R0lGODdhUgBS...WQBADs=" width="82" height="82"/>
+const imgTag = qr.createImgTag()
+
+document.getElementById('placeHolder').innerHTML = imgTag;
+```
+
+### native
 ```javascript
 import QRCoder from 'qrcoder'
 
@@ -22,6 +65,25 @@ document.getElementById('placeHolder').innerHTML = qr.createImgTag();
 ## API Documentation
 
 ### QRCoder Class
+
+#### QRCoder(options) => <code>QRCoder</code>
+Create a QRCoder Object.
+
+| Param                | Type                | Description                                 |
+| ---------------------| ------------------- | ------------------------------------------- |
+| options           | <code>Object</code> | options Object
+
+
+Default options
+
+| Param                | Type                | Description                                 |
+| ---------------------| ------------------- | ------------------------------------------- |
+| options.typeNumber           | <code>number</code> | default: 4
+| options.errorCorrectionLevel | <code>string</code> | default: 'L'
+| options.mode                 | <code>string</code> | default: 'Byte'
+| options.cellSize             | <code>number</code> | default: 2
+| options.margin               | <code>number</code> | default: 8
+| options.data                 | <code>string</code> | default: undefined
 
 #### QRCoder(typeNumber, errorCorrectionLevel) => <code>QRCoder</code>
 Create a QRCoder Object.
@@ -66,6 +128,7 @@ _[Note] call make() before this function._
 | row   | <code>number</code> | 0 ~ moduleCount - 1 |
 | col   | <code>number</code> | 0 ~ moduleCount - 1 |
 
+#### getDataURL(cellSize, margin) => <code>string</code>
 #### createImgTag(cellSize, margin) => <code>string</code>
 #### createSvgTag(cellSize, margin) => <code>string</code>
 #### createTableTag(cellSize, margin) => <code>string</code>

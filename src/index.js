@@ -9,6 +9,7 @@ import QRKanji from './qrkanji'
 import GifImage from './gifimage'
 import Base64EncodeOutputStream from './base64encode'
 import ByteArrayOutputStream from './bytearrayoutputstream'
+import type from './type'
 import { QRErrorCorrectionLevel, PAD0, PAD1 } from './constant'
 import { stringToBytesFuncs, createStringToBytes } from './utils'
 
@@ -18,12 +19,30 @@ import { stringToBytesFuncs, createStringToBytes } from './utils'
  * @param errorCorrectionLevel 'L','M','Q','H'
  */
 function QRCoder (typeNumber, errorCorrectionLevel) {
+  if (type(typeNumber) === 'object') {
+    this._options = typeNumber
+    typeNumber = this._options.typeNumber
+    errorCorrectionLevel = this._options.errorCorrectionLevel
+  } else {
+    this._options = {
+      typeNumber,
+      errorCorrectionLevel
+    }
+  }
+
+  typeNumber = typeNumber || 4
+  errorCorrectionLevel = errorCorrectionLevel || 'L'
   this._typeNumber = typeNumber
   this._errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel]
   this._modules = null
   this._moduleCount = 0
   this._dataCache = null
   this._dataList = []
+
+  if (this._options.data) {
+    this.addData(this._options.data)
+    this.make()
+  }
 }
 
 QRCoder.prototype = {
@@ -335,7 +354,7 @@ QRCoder.prototype = {
     return this.createBytes(buffer, rsBlocks)
   },
   addData: function (data, mode) {
-    mode = mode || 'Byte'
+    mode = mode || this._options.mode || 'Byte'
     let newData = null
 
     switch (mode) {
@@ -371,8 +390,8 @@ QRCoder.prototype = {
     this.makeImpl(false, this.getBestMaskPattern())
   },
   createTableTag: function (cellSize, margin) {
-    cellSize = cellSize || 2
-    margin = (typeof margin === 'undefined') ? cellSize * 4 : margin
+    cellSize = cellSize || this._options.cellSize || 2
+    margin = margin || this._options.margin || cellSize * 4
 
     let qrHtml = ''
     qrHtml += '<table style="'
@@ -406,8 +425,8 @@ QRCoder.prototype = {
     return qrHtml
   },
   createSvgTag: function (cellSize, margin) {
-    cellSize = cellSize || 2
-    margin = (typeof margin === 'undefined') ? cellSize * 4 : margin
+    cellSize = cellSize || this._options.cellSize || 2
+    margin = margin || this._options.margin || cellSize * 4
     let size = this.getModuleCount() * cellSize + margin * 2
     let c
     let mc
@@ -441,15 +460,24 @@ QRCoder.prototype = {
 
     return qrSvg
   },
-  createImgTag: function (cellSize, margin) {
-    cellSize = cellSize || 2
-    margin = (typeof margin === 'undefined') ? cellSize * 4 : margin
+  createImgTag: function (cellSize, margin, alt) {
+    cellSize = cellSize || this._options.cellSize || 2
+    margin = margin || this._options.margin || cellSize * 4
+
+    let size = this.getModuleCount() * cellSize + margin * 2
+    let dataUrl = this.getDataURL(cellSize, margin)
+
+    return createImgTag(size, size, dataUrl, alt)
+  },
+  getDataURL: function (cellSize, margin) {
+    cellSize = cellSize || this._options.cellSize || 2
+    margin = margin || this._options.margin || cellSize * 4
 
     let size = this.getModuleCount() * cellSize + margin * 2
     let min = margin
     let max = size - margin
 
-    return createImgTag(size, size, (x, y) => {
+    return getGifDataURL(size, size, (x, y) => {
       if (min <= x && x < max && min <= y && y < max) {
         let c = Math.floor((x - min) / cellSize)
         let r = Math.floor((y - min) / cellSize)
@@ -471,7 +499,29 @@ QRCoder.stringToBytes = stringToBytesFuncs['default']
  */
 QRCoder.createStringToBytes = createStringToBytes
 
-function createImgTag (width, height, getPixel, alt) {
+function createImgTag (width, height, dataUrl, alt) {
+  let img = ''
+  img += '<img'
+  img += '\u0020src="'
+  img += dataUrl
+  img += '"'
+  img += '\u0020width="'
+  img += width
+  img += '"'
+  img += '\u0020height="'
+  img += height
+  img += '"'
+  if (alt) {
+    img += '\u0020alt="'
+    img += alt
+    img += '"'
+  }
+  img += '/>'
+
+  return img
+}
+
+function getGifDataURL (width, height, getPixel) {
   let gif = new GifImage(width, height)
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
@@ -489,26 +539,7 @@ function createImgTag (width, height, getPixel, alt) {
   }
   base64.flush()
 
-  let img = ''
-  img += '<img'
-  img += '\u0020src="'
-  img += 'data:image/gif;base64,'
-  img += base64
-  img += '"'
-  img += '\u0020width="'
-  img += width
-  img += '"'
-  img += '\u0020height="'
-  img += height
-  img += '"'
-  if (alt) {
-    img += '\u0020alt="'
-    img += alt
-    img += '"'
-  }
-  img += '/>'
-
-  return img
+  return 'data:image/gif;base64,' + base64
 }
 
 export default QRCoder
