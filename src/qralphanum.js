@@ -31,7 +31,7 @@ QRAlphaNum.prototype = {
   getMode: function () {
     return this._mode
   },
-  getLength: function (buffer) {
+  getLength: function () {
     return this._data.length
   },
   write: function (buffer) {

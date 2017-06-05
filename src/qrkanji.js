@@ -19,7 +19,7 @@ QRKanji.prototype = {
   getMode: function () {
     return this._mode
   },
-  getLength: function (buffer) {
+  getLength: function () {
     return ~~(this._bytes.length / 2)
   },
   write: function (buffer) {

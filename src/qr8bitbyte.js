@@ -11,7 +11,7 @@ QR8BitByte.prototype = {
   getMode: function () {
     return this._mode
   },
-  getLength: function (buffer) {
+  getLength: function () {
     return this._bytes.length
   },
   write: function (buffer) {

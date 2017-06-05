@@ -1,4 +1,4 @@
-function ByteArrayOutputStream (str) {
+function ByteArrayOutputStream () {
   this._bytes = []
 }
 

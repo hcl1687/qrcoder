@@ -80,7 +80,7 @@ export const QRUtil = {
       case QRMaskPattern.PATTERN000:
         return function (i, j) { return (i + j) % 2 === 0 }
       case QRMaskPattern.PATTERN001:
-        return function (i, j) { return i % 2 === 0 }
+        return function (i) { return i % 2 === 0 }
       case QRMaskPattern.PATTERN010:
         return function (i, j) { return j % 3 === 0 }
       case QRMaskPattern.PATTERN011:

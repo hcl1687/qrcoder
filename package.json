@@ -3,8 +3,8 @@
   "version": "1.0.1",
   "description": "",
   "main": "dist/qrcoder.js",
-  "module": "dist/qrcoder.mjs",
-  "jsnext:main": "dist/qrcoder.mjs",
+  "module": "dist/qrcoder.esm.js",
+  "jsnext:main": "dist/qrcoder.esm.js",
   "scripts": {
     "lint": "eslint src test",
     "pretest": "rollup -c",
