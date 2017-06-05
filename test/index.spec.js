@@ -1,10 +1,11 @@
-import QRCoder from '../src/index'
+import QRCoder from '../'
+import qrcode from './qrcode'
+import { expect } from 'chai'
 
 describe('test qrcode', function () {
   it('type:4, el:L, out: gifimage', () => {
     const typeNumber = 4
     const errorCorrectionLevel = 'L'
-    const qrcode = window.qrcode
     const qr = qrcode(typeNumber, errorCorrectionLevel)
     qr.addData('Hi!')
     qr.make()
@@ -18,7 +19,6 @@ describe('test qrcode', function () {
   it('new with options', () => {
     const typeNumber = 4
     const errorCorrectionLevel = 'L'
-    const qrcode = window.qrcode
     const qr = qrcode(typeNumber, errorCorrectionLevel)
     qr.addData('Hi!')
     qr.make()
