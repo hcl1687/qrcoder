@@ -10,7 +10,7 @@ import GifImage from './gifimage'
 import Base64EncodeOutputStream from './base64encode'
 import ByteArrayOutputStream from './bytearrayoutputstream'
 import type from './type'
-import { QRErrorCorrectionLevel, PAD0, PAD1 } from './constant'
+import { QRErrorCorrectionLevel, PAD0, PAD1, QRCapacity } from './constant'
 import { stringToBytesFuncs, createStringToBytes } from './utils'
 
 /**
@@ -30,10 +30,11 @@ function QRCoder (typeNumber, errorCorrectionLevel) {
     }
   }
 
-  typeNumber = typeNumber || 4
-  errorCorrectionLevel = errorCorrectionLevel || 'L'
+  errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel || 'L']
+  typeNumber = typeNumber ||
+    this.calcTypeNumber(this._options.data, errorCorrectionLevel) || 4
   this._typeNumber = typeNumber
-  this._errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel]
+  this._errorCorrectionLevel = errorCorrectionLevel
   this._modules = null
   this._moduleCount = 0
   this._dataCache = null
@@ -390,8 +391,9 @@ QRCoder.prototype = {
     this.makeImpl(false, this.getBestMaskPattern())
   },
   createTableTag: function (cellSize, margin) {
-    cellSize = cellSize || this._options.cellSize || 2
-    margin = margin || this._options.margin || cellSize * 4
+    const spec = this.calcSpec(cellSize, margin)
+    cellSize = spec.cellSize
+    margin = spec.margin
 
     let qrHtml = ''
     qrHtml += '<table style="'
@@ -425,8 +427,9 @@ QRCoder.prototype = {
     return qrHtml
   },
   createSvgTag: function (cellSize, margin) {
-    cellSize = cellSize || this._options.cellSize || 2
-    margin = margin || this._options.margin || cellSize * 4
+    const spec = this.calcSpec(cellSize, margin)
+    cellSize = spec.cellSize
+    margin = spec.margin
     let size = this.getModuleCount() * cellSize + margin * 2
     let c
     let mc
@@ -461,8 +464,9 @@ QRCoder.prototype = {
     return qrSvg
   },
   createImgTag: function (cellSize, margin, alt) {
-    cellSize = cellSize || this._options.cellSize || 2
-    margin = margin || this._options.margin || cellSize * 4
+    const spec = this.calcSpec(cellSize, margin)
+    cellSize = spec.cellSize
+    margin = spec.margin
 
     let size = this.getModuleCount() * cellSize + margin * 2
     let dataUrl = this.getDataURL(cellSize, margin)
@@ -470,8 +474,9 @@ QRCoder.prototype = {
     return createImgTag(size, size, dataUrl, alt)
   },
   getDataURL: function (cellSize, margin) {
-    cellSize = cellSize || this._options.cellSize || 2
-    margin = margin || this._options.margin || cellSize * 4
+    const spec = this.calcSpec(cellSize, margin)
+    cellSize = spec.cellSize
+    margin = spec.margin
 
     let size = this.getModuleCount() * cellSize + margin * 2
     let min = margin
@@ -486,6 +491,46 @@ QRCoder.prototype = {
         return 1
       }
     })
+  },
+  calcTypeNumber: function (data, errorCorrectionLevel, mode) {
+    mode = mode || this._options.mode || 'Byte'
+    if (!data) {
+      return
+    }
+
+    const arrCapacity = QRCapacity[mode][errorCorrectionLevel]
+    for(let i = 0; i<arrCapacity.length; i++) {
+      if (data.length < +arrCapacity[i]) {
+        return i + 1
+      }
+    }
+
+    throw new Error('code length overflow. ')
+  },
+  calcSpec: function (cellSize, margin) {
+    if (!cellSize && !margin && this._options.size) {
+      // 计算cellSize, margin
+      const size = this._options.size
+      const moduleCount = this.getModuleCount()
+      cellSize = Math.floor(size / moduleCount)
+      if (cellSize < 1) {
+        throw new Error('size is less than moduleCount')
+      }
+      margin = Math.floor((size % moduleCount) / 2)
+
+      return {
+        cellSize,
+        margin
+      }
+    }
+
+    cellSize = cellSize || this._options.cellSize || 2,
+    margin = margin || this._options.margin || cellSize * 4
+
+    return {
+      cellSize,
+      margin
+    }
   }
 }
 
