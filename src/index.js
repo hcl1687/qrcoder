@@ -18,21 +18,15 @@ import { stringToBytesFuncs, createStringToBytes } from './utils'
  * @param typeNumber 1 to 40
  * @param errorCorrectionLevel 'L','M','Q','H'
  */
-function QRCoder (typeNumber, errorCorrectionLevel) {
-  if (type(typeNumber) === 'object') {
-    this._options = typeNumber
-    typeNumber = this._options.typeNumber
-    errorCorrectionLevel = this._options.errorCorrectionLevel
-  } else {
-    this._options = {
-      typeNumber,
-      errorCorrectionLevel
-    }
+function QRCoder (options) {
+  if (type(options) !== 'object') {
+    throw new Error('options should be a Object.')
   }
+  this._options = options
 
-  errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel || 'L']
-  typeNumber = typeNumber ||
-    this.calcTypeNumber(this._options.data, errorCorrectionLevel) || 4
+  const errorCorrectionLevel = QRErrorCorrectionLevel[this._options.errorCorrectionLevel || 'L']
+  const typeNumber = this._options.typeNumber ||
+    this.calcTypeNumber(this._options.data, errorCorrectionLevel, this._options.mode) || 4
   this._typeNumber = typeNumber
   this._errorCorrectionLevel = errorCorrectionLevel
   this._modules = null
@@ -390,10 +384,8 @@ QRCoder.prototype = {
   make: function () {
     this.makeImpl(false, this.getBestMaskPattern())
   },
-  createTableTag: function (cellSize, margin) {
-    const spec = this.calcSpec(cellSize, margin)
-    cellSize = spec.cellSize
-    margin = spec.margin
+  createTableTag: function () {
+    const { cellSize, margin } = this.calcSpec()
 
     let qrHtml = ''
     qrHtml += '<table style="'
@@ -426,11 +418,9 @@ QRCoder.prototype = {
 
     return qrHtml
   },
-  createSvgTag: function (cellSize, margin) {
-    const spec = this.calcSpec(cellSize, margin)
-    cellSize = spec.cellSize
-    margin = spec.margin
-    let size = this.getModuleCount() * cellSize + margin * 2
+  createSvgTag: function () {
+    const { cellSize, margin, size } = this.calcSpec()
+
     let c
     let mc
     let r
@@ -463,22 +453,17 @@ QRCoder.prototype = {
 
     return qrSvg
   },
-  createImgTag: function (cellSize, margin, alt) {
-    const spec = this.calcSpec(cellSize, margin)
-    cellSize = spec.cellSize
-    margin = spec.margin
+  createImgTag: function () {
+    const { cellSize, margin, size } = this.calcSpec()
+    const alt = this._options.alt || ''
 
-    let size = this.getModuleCount() * cellSize + margin * 2
     let dataUrl = this.getDataURL(cellSize, margin)
 
     return createImgTag(size, size, dataUrl, alt)
   },
-  getDataURL: function (cellSize, margin) {
-    const spec = this.calcSpec(cellSize, margin)
-    cellSize = spec.cellSize
-    margin = spec.margin
+  getDataURL: function () {
+    const { cellSize, margin, size } = this.calcSpec()
 
-    let size = this.getModuleCount() * cellSize + margin * 2
     let min = margin
     let max = size - margin
 
@@ -493,7 +478,7 @@ QRCoder.prototype = {
     })
   },
   calcTypeNumber: function (data, errorCorrectionLevel, mode) {
-    mode = mode || this._options.mode || 'Byte'
+    mode = mode || 'Byte'
     if (!data) {
       return
     }
@@ -507,30 +492,47 @@ QRCoder.prototype = {
 
     throw new Error('code length overflow. ')
   },
-  calcSpec: function (cellSize, margin) {
-    if (!cellSize && !margin && this._options.size) {
-      // 计算cellSize, margin
+  calcSpec: function () {
+    let cellSize
+    let margin
+    let size
+    const moduleCount = this.getModuleCount()
+    if (!this._options.cellSize && !this._options.margin
+      && this._options.size) {
+      // clac cellSize, margin
       const size = this._options.size
-      const moduleCount = this.getModuleCount()
       cellSize = Math.floor(size / moduleCount)
       if (cellSize < 1) {
-        throw new Error('size is less than moduleCount')
+        console.log('size is less than moduleCount')
+        cellSize = 1
+        margin = 0
+      } else {
+        margin = Math.floor((size % moduleCount) / 2)
       }
-      margin = Math.floor((size % moduleCount) / 2)
-
-      return {
-        cellSize,
-        margin
-      }
+    } else {
+      cellSize = cellSize || this._options.cellSize || 2,
+      margin = margin || this._options.margin || cellSize * 4
     }
 
-    cellSize = cellSize || this._options.cellSize || 2,
-    margin = margin || this._options.margin || cellSize * 4
+    size = moduleCount * cellSize + margin * 2
 
     return {
       cellSize,
-      margin
+      margin,
+      size
     }
+  },
+  getSize() {
+    const { size } = this.calcSpec()
+    return size
+  },
+  getCellSize() {
+    const { cellSize } = this.calcSpec()
+    return cellSize
+  },
+  getMargin() {
+    const { margin } = this.calcSpec()
+    return margin
   }
 }
 
