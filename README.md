@@ -26,16 +26,48 @@ const imgTag = qr.createImgTag()
 document.getElementById('placeHolder').innerHTML = imgTag;
 ```
 
+### specify size
+```javascript
+import QRCoder from 'qrcoder'
+
+// want to create a qrcode image, which size is 101px
+// QRCoder will create a qrcode image to fit this size,
+// it try to calc a size which is close to this size,
+// but no guarantee to equal it.
+// you can use getSize function to get the real size.
+// in this case, the real size is 100
+const qrcoder = new QRCoder({
+  data: 'Hi!',
+  size: 101
+})
+
+// data:image/gif;base64,R0lG...pAoUAAA7
+const dataURL = qr.getDataURL()
+
+// <img src="data:image/gif;base64,R0lG...pAoUAAA7" width="100" height="100"/>"
+const imgTag = qr.createImgTag()
+
+const size = qrcoder.getSize()  // 100
+const cellSize = qrcoder.getCellSize()  // 4
+const margin = qrcoder.getMargin()  // 8
+const moduleCount = qrcoder.getModuleCount() // 21
+
+document.getElementById('placeHolder').innerHTML = imgTag;
+```
+
 ### more options
 ```javascript
 import QRCoder from 'qrcoder'
 
+// if specify cellSize or margin or both of them, size will be ignore.
 const qr = new QRCoder({
   typeNumber: 4,
   errorCorrectionLevel: 'L',
   mode: 'Byte',
   cellSize: 2,
   margin: 8,
+  size: 101,
+  alt: '',
   data: 'Hi!'
 });
 
@@ -52,13 +84,17 @@ document.getElementById('placeHolder').innerHTML = imgTag;
 ```javascript
 import QRCoder from 'qrcoder'
 
-const typeNumber = 4;
-const errorCorrectionLevel = 'L';
-const qr = new QRCoder(typeNumber, errorCorrectionLevel);
-qr.addData('Hi!');
-qr.make();
-document.getElementById('placeHolder').innerHTML = qr.createImgTag();
+const typeNumber = 4
+const errorCorrectionLevel = 'L'
+const qr = new QRCoder({
+  typeNumber,
+  errorCorrectionLevel
+})
+qr.addData('Hi!')
+qr.make()
+document.getElementById('placeHolder').innerHTML = qr.createImgTag()
 ```
+
 ## API Documentation
 
 ### QRCoder Class
@@ -80,15 +116,9 @@ Default options
 | options.mode                 | <code>string</code> | default: 'Byte'
 | options.cellSize             | <code>number</code> | default: 2
 | options.margin               | <code>number</code> | default: 8
+| options.size                 | <code>number</code> | default: undefined
 | options.data                 | <code>string</code> | default: undefined
-
-#### QRCoder(typeNumber, errorCorrectionLevel) => <code>QRCoder</code>
-Create a QRCoder Object.
-
-| Param                | Type                | Description                                 |
-| ---------------------| ------------------- | ------------------------------------------- |
-| typeNumber           | <code>number</code> | Type number (1 ~ 40)                        |
-| errorCorrectionLevel | <code>string</code> | Error correction level ('L', 'M', 'Q', 'H') |
+| options.alt                 | <code>string</code> | default: ''
 
 #### QRCoder.stringToBytes(s) : <code>number[]</code>
 Encodes a string into an array of number(byte) using any charset.
@@ -116,6 +146,15 @@ Make a QR Code.
 The number of modules(cells) for each orientation.
 _[Note] call make() before this function._
 
+#### getSize() => <code>number</code>
+The size of the qrcode image.
+
+#### getCellSize() => <code>number</code>
+The number of the qrcode's cell.
+
+#### getMargin() => <code>number</code>
+The number of the qrcode image's margin.
+
 #### isDark(row, col) => <code>boolean</code>
 The module at row and col is dark or not.
 _[Note] call make() before this function._
@@ -125,17 +164,11 @@ _[Note] call make() before this function._
 | row   | <code>number</code> | 0 ~ moduleCount - 1 |
 | col   | <code>number</code> | 0 ~ moduleCount - 1 |
 
-#### getDataURL(cellSize, margin) => <code>string</code>
-#### createImgTag(cellSize, margin) => <code>string</code>
-#### createSvgTag(cellSize, margin) => <code>string</code>
-#### createTableTag(cellSize, margin) => <code>string</code>
+#### getDataURL() => <code>string</code>
+#### createImgTag() => <code>string</code>
+#### createSvgTag() => <code>string</code>
+#### createTableTag() => <code>string</code>
 Helper functions for HTML.
- _[Note] call make() before these functions._
-
-| Param    | Type                | Description           |
-| ---------| ------------------- | --------------------- |
-| cellSize | <code>number</code> | default: 2            |
-| margin   | <code>number</code> | default: cellSize * 4 |
 
 ## License
 [MIT](https://opensource.org/licenses/mit-license.php)

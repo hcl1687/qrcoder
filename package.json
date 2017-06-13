@@ -1,6 +1,6 @@
 {
   "name": "qrcoder",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "dist/qrcoder.js",
   "module": "dist/qrcoder.esm.js",
