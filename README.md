@@ -35,6 +35,7 @@ import QRCoder from 'qrcoder'
 // it try to calc a size which is close to this size,
 // but no guarantee to equal it.
 // you can use getSize function to get the real size.
+// size = moduleCount * cellSize + margin * 2
 // in this case, the real size is 100
 const qrcoder = new QRCoder({
   data: 'Hi!',
